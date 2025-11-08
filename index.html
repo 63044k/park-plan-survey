@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Park Plan Survey</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; max-width: 960px; margin: 24px auto; padding: 0 12px; }
+    h1 { margin: 0 0 12px; }
+    .meta { font-size: 14px; opacity: .8; margin-bottom: 12px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin: 12px 0; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+    img { max-width: 100%; border-radius: 6px; display: block; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    button { padding: 10px 16px; border-radius: 8px; border: 1px solid #333; background: #fff; cursor: pointer; }
+    #status.ok { color: #096; }
+    #status.err { color: #c00; }
+    .muted { font-size: 12px; opacity: .7; }
+    label.block { display: block; margin-top: 8px; }
+    input[type="text"] { padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+    /* Consent modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 9999; }
+    .modal { background: #fff; padding: 18px; max-width: 720px; width: 96%; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .modal h2 { margin-top: 0; }
+    .consent-body { max-height: 44vh; overflow: auto; border: 1px solid #eee; padding: 12px; margin-bottom: 12px; border-radius: 6px; background: #fafafa; }
+    .modal-row { display:flex; gap:8px; align-items:center; margin-top:8px; }
+    .modal input[type="password"], .modal input[type="text"] { width: 100%; }
+    .modal .muted { margin-left: 8px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>SAAG Survey</h1>
+
+  <div class="meta">
+    <div><strong>Scenario:</strong> <span id="scenario">–</span></div>
+    <div><strong>LLM:</strong> <span id="llm">–</span></div>
+  </div>
+
+  <div class="card">
+    <label class="block">Participant ID (optional): <input id="pid" type="text" placeholder="e.g., P001" /></label>
+    <div class="muted">Leave blank if you don’t need per-person IDs.</div>
+  </div>
+
+  <div id="pairsHost"></div>
+
+  <div class="row" style="margin-top:12px;">
+    <button id="submitBtn">Submit</button>
+    <div id="status" class="muted"></div>
+  </div>
+
+  <!-- Consent modal (hidden by default) -->
+  <div id="consentModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h2>Survey Consent</h2>
+      <div class="consent-body">
+        <p>Please read the following before participating in this survey.</p>
+        <p><strong>Purpose:</strong> This survey collects preferences between two images for research purposes.</p>
+        <p><strong>Data:</strong> We will record your selections and an optional participant ID. Images and minimal metadata may be stored.</p>
+        <p><strong>Confidentiality:</strong> No personal identifying information will be collected unless you provide it in the Participant ID field.</p>
+        <p>By entering the secret token below and clicking Continue you confirm you consent to participate.</p>
+      </div>
+
+      <div class="modal-row">
+        <label style="flex:1">Secret (will set TOKEN): <input id="secretInput" type="password" placeholder="Enter secret token"></label>
+      </div>
+      <div class="modal-row">
+        <label><input id="consentCheckbox" type="checkbox"> I consent to participate</label>
+      </div>
+      <div class="modal-row" style="justify-content:flex-end; margin-top:12px;">
+        <div id="consentStatus" class="muted" style="margin-right:auto"></div>
+        <button id="consentContinueBtn">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
