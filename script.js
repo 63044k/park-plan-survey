@@ -133,15 +133,16 @@ async function submit() {
 		setStatus("Submitting…");
 		const selections = collectSelections();
 		const participantId = (pidEl.value || "").trim();
-
+        const ts = Date.now();
+        
 		const body = {
 			token: TOKEN,
+			participantId,
 			scenarioId: manifest.scenarioId,
 			llmId: manifest.llmId,
-			participantId,
 			selections,
 			clientMeta: {
-				ts: Date.now(),
+				ts: ts,
 				ua: navigator.userAgent,
 				page: location.href
 			}
@@ -150,8 +151,9 @@ async function submit() {
 		const res = await fetch(SCRIPT_BASE + "?token=" + encodeURIComponent(TOKEN), {
 			method: "POST",
 			// headers: { "Content-Type": "application/json" },
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-			body: JSON.stringify(body)
+			headers: { "Content-Type": "text/plain;charset=utf-8" },
+			// pretty-print the JSON so it's human readable (includes newlines)
+			body: JSON.stringify(body, null, 2)
 		});
 		const j = await res.json();
 		if (!j.ok) throw new Error(j.error || "submit failed");
