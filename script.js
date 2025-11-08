@@ -10,6 +10,10 @@ const forcedLLM = params.get("llm");
 // Scenario/LLM UI removed; we'll log those values instead of writing to the DOM.
 const pairsHost = document.getElementById("pairsHost");
 const statusEl = document.getElementById("status");
+const submitBtn = document.getElementById("submitBtn");
+
+let isSubmitting = false;
+let hasSubmitted = false; // once true, prevent further submissions
 
 // participantId will be a GUID generated on page load (no UI). Set in boot.
 let participantId = null;
@@ -88,9 +92,14 @@ function renderPairs(pairs) {
       <label class="block"><input type="radio" name="${qid}" value="B"> Choose B</label>
     `;
 
-    grid.appendChild(leftWrap);
-    grid.appendChild(rightWrap);
+	grid.appendChild(leftWrap);
+	grid.appendChild(rightWrap);
     card.appendChild(grid);
+
+	// Attach change listeners to inputs so we can enable the submit button when all answered
+	// (inputs were added via innerHTML above)
+	const radios = card.querySelectorAll(`input[name="${qid}"]`);
+	radios.forEach(r => r.addEventListener('change', () => updateSubmitState()));
 
 	// (Removed the optional 'Can't decide' choice per requirement.)
 
@@ -104,6 +113,30 @@ function renderPairs(pairs) {
 
     pairsHost.appendChild(card);
   });
+
+	// initial update of submit button state
+	updateSubmitState();
+}
+
+
+function allAnswered() {
+	const cards = Array.from(pairsHost.querySelectorAll('.card'));
+	if (cards.length === 0) return false;
+	for (let i = 0; i < cards.length; i++) {
+		const qid = 'q' + (i + 1);
+		const sel = document.querySelector(`input[name="${qid}"]:checked`);
+		if (!sel) return false;
+	}
+	return true;
+}
+
+function updateSubmitState() {
+	if (!submitBtn) return;
+	if (hasSubmitted || isSubmitting) {
+		submitBtn.disabled = true;
+		return;
+	}
+	submitBtn.disabled = !allAnswered();
 }
 
 
@@ -137,13 +170,20 @@ function collectSelections() {
 }
 
 async function submit() {
+	// Prevent double submission
+	if (isSubmitting || hasSubmitted) return;
 	try {
+		isSubmitting = true;
+		updateSubmitState();
 		setStatus("Submitting…");
-	const selections = collectSelections();
-	// participantId was generated on page load (no UI)
-	const participantIdLocal = participantId || makeGuid();
-        const ts = Date.now();
-        
+		// disable the button immediately
+		if (submitBtn) submitBtn.disabled = true;
+
+		const selections = collectSelections();
+		// participantId was generated on page load (no UI)
+		const participantIdLocal = participantId || makeGuid();
+		const ts = Date.now();
+
 		const body = {
 			token: TOKEN,
 			participantId: participantIdLocal,
@@ -167,9 +207,16 @@ async function submit() {
 		const j = await res.json();
 		if (!j.ok) throw new Error(j.error || "submit failed");
 		setStatus("Saved. Thank you.", "ok");
+		hasSubmitted = true; // permanently mark as submitted
+		updateSubmitState();
 	} catch (e) {
 		console.error(e);
 		setStatus(e.message || "Error", "err");
+		// keep the button disabled to avoid multiple submits (per requirement)
+		hasSubmitted = true;
+		updateSubmitState();
+	} finally {
+		isSubmitting = false;
 	}
 }
 
