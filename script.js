@@ -92,11 +92,7 @@ function renderPairs(pairs) {
     grid.appendChild(rightWrap);
     card.appendChild(grid);
 
-    // Optional undecided
-    const undec = document.createElement("label");
-    undec.className = "block muted";
-    undec.innerHTML = `<input type="radio" name="${qid}" value="U"> Can't decide`;
-    card.appendChild(undec);
+	// (Removed the optional 'Can't decide' choice per requirement.)
 
 	// Store names and pair id for submit; keep actual srcs in JS properties only
 	card.dataset.leftName = p.leftName || "";
