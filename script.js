@@ -44,6 +44,13 @@ function extractMode(name) {
 	return m ? m[0] : null;
 }
 
+// Extract the inner content of the first square-bracket group, e.g. "[abc]_..." -> "abc"
+function extractFirstBracketContent(s) {
+    if (!s) return null;
+    const m = s.match(/\[([^\]]+)\]/);
+    return m ? m[1] : null;
+}
+
 function manifestUrl() {
 	const u = new URL(SCRIPT_BASE);
 	if (TOKEN) u.searchParams.set("token", TOKEN);
@@ -229,10 +236,13 @@ async function submit() {
 		const participantIdLocal = participantId || makeGuid();
 		const ts = Date.now();
 
+		const layoutHash = extractFirstBracketContent(manifest && manifest.scenarioId);
+
 		const body = {
 			token: TOKEN,
 			participantId: participantIdLocal,
 			scenarioId: manifest.scenarioId,
+			layoutHash: layoutHash,
 			llmId: manifest.llmId,
 			selections,
 			clientMeta: {
