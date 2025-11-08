@@ -11,13 +11,23 @@ const scenarioEl = document.getElementById("scenario");
 const llmEl = document.getElementById("llm");
 const pairsHost = document.getElementById("pairsHost");
 const statusEl = document.getElementById("status");
-const pidEl = document.getElementById("pid");
+
+// participantId will be a GUID generated on page load (no UI). Set in boot.
+let participantId = null;
 
 let manifest = null;
 
 function setStatus(msg, cls = "") {
 	statusEl.className = cls;
 	statusEl.textContent = msg;
+}
+
+// Generate a GUID for participantId. Use crypto.randomUUID when available.
+function makeGuid() {
+	if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+	// fallback to a reasonably unique id
+	const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+	return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
 }
 
 // Extract the first bracketed mode from a name, including brackets, or null if none.
@@ -131,13 +141,14 @@ function collectSelections() {
 async function submit() {
 	try {
 		setStatus("Submitting…");
-		const selections = collectSelections();
-		const participantId = (pidEl.value || "").trim();
+	const selections = collectSelections();
+	// participantId was generated on page load (no UI)
+	const participantIdLocal = participantId || makeGuid();
         const ts = Date.now();
         
 		const body = {
 			token: TOKEN,
-			participantId,
+			participantId: participantIdLocal,
 			scenarioId: manifest.scenarioId,
 			llmId: manifest.llmId,
 			selections,
@@ -209,6 +220,8 @@ async function requireConsentAndToken() {
 (async () => {
 	try {
 		await requireConsentAndToken();
+		// generate participantId as a GUID on page load
+		participantId = makeGuid();
 		manifest = await loadManifest();
 		scenarioEl.textContent = manifest.scenarioId;
 		llmEl.textContent = manifest.llmId;
