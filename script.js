@@ -36,50 +36,6 @@ async function loadManifest() {
 	return j;
 }
 
-function renderPairsX(pairs) {
-	pairsHost.innerHTML = "";
-	pairs.forEach((p, idx) => {
-		const qid = "q" + (idx + 1); // simple sequential ids for the client
-		const card = document.createElement("div");
-		card.className = "card";
-
-		const head = document.createElement("div");
-		head.innerHTML = `<strong>Question ${idx + 1}</strong> <span class="muted">${p.id}</span>`;
-		card.appendChild(head);
-
-		const grid = document.createElement("div");
-		grid.className = "grid";
-
-		const leftWrap = document.createElement("div");
-		leftWrap.innerHTML = `
-			<img src="${p.left}" alt="${qid}-A">
-			<label class="block"><input type="radio" name="${qid}" value="A"> Choose A</label>
-		`;
-
-		const rightWrap = document.createElement("div");
-		rightWrap.innerHTML = `
-			<img src="${p.right}" alt="${qid}-B">
-			<label class="block"><input type="radio" name="${qid}" value="B"> Choose B</label>
-		`;
-
-		grid.appendChild(leftWrap);
-		grid.appendChild(rightWrap);
-		card.appendChild(grid);
-
-		// optional undecided
-		const undec = document.createElement("label");
-		undec.className = "block muted";
-		undec.innerHTML = `<input type="radio" name="${qid}" value="U"> Can't decide`;
-		card.appendChild(undec);
-
-		// store original URLs as data attributes for later POST
-		card.dataset.left = p.left;
-		card.dataset.right = p.right;
-		card.dataset.pid = p.id; // pair folder name
-
-		pairsHost.appendChild(card);
-	});
-}
 
 function renderPairs(pairs) {
   const toDataUrl = (mime, b64) => `data:${mime};base64,${b64}`;
@@ -123,10 +79,13 @@ function renderPairs(pairs) {
     undec.innerHTML = `<input type="radio" name="${qid}" value="U"> Can't decide`;
     card.appendChild(undec);
 
-    // Store sources for submit (note: these are data URLs now)
-    card.dataset.left = leftSrc;
-    card.dataset.right = rightSrc;
-    card.dataset.pid = p.id; // pair folder name
+	// Store names and pair id for submit; keep actual srcs in JS properties only
+	card.dataset.leftName = p.leftName || "";
+	card.dataset.rightName = p.rightName || "";
+	card.dataset.pid = p.id; // pair folder name
+	// keep srcs on the element (not in dataset) for rendering but avoid sending base64 in POST
+	card._leftSrc = leftSrc;
+	card._rightSrc = rightSrc;
 
     pairsHost.appendChild(card);
   });
@@ -141,15 +100,15 @@ function collectSelections() {
 		const sel = document.querySelector(`input[name="${qid}"]:checked`);
 		if (!sel) throw new Error("Please answer all questions.");
 		const choice = sel.value; // 'A' | 'B' | 'U'
-		const left = cards[i].dataset.left;
-		const right = cards[i].dataset.right;
+		const leftName = cards[i].dataset.leftName || null;
+		const rightName = cards[i].dataset.rightName || null;
 		selections.push({
 			qid,
 			pairId: cards[i].dataset.pid,
 			choice,
-			chosenImage: choice === "A" ? left : (choice === "B" ? right : null),
-			left,
-			right
+			chosenName: choice === "A" ? leftName : (choice === "B" ? rightName : null),
+			leftName,
+			rightName
 		});
 	}
 	return selections;
