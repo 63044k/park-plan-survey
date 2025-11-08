@@ -20,6 +20,13 @@ function setStatus(msg, cls = "") {
 	statusEl.textContent = msg;
 }
 
+// Extract the first bracketed mode from a name, including brackets, or null if none.
+function extractMode(name) {
+	if (!name) return null;
+	const m = name.match(/\[[^\]]*\]/);
+	return m ? m[0] : null;
+}
+
 function manifestUrl() {
 	const u = new URL(SCRIPT_BASE);
 	if (TOKEN) u.searchParams.set("token", TOKEN);
@@ -102,11 +109,18 @@ function collectSelections() {
 		const choice = sel.value; // 'A' | 'B' | 'U'
 		const leftName = cards[i].dataset.leftName || null;
 		const rightName = cards[i].dataset.rightName || null;
+		const chosenName = choice === "A" ? leftName : (choice === "B" ? rightName : null);
+		const rejectedName = choice === "A" ? rightName : (choice === "B" ? leftName : null);
+		const chosenMode = chosenName ? extractMode(chosenName) : null;
+		const rejectedMode = rejectedName ? extractMode(rejectedName) : null;
 		selections.push({
 			qid,
 			pairId: cards[i].dataset.pid,
 			choice,
-			chosenName: choice === "A" ? leftName : (choice === "B" ? rightName : null),
+			chosenName,
+			rejectedName,
+			chosenMode,
+			rejectedMode,
 			leftName,
 			rightName
 		});
