@@ -203,12 +203,12 @@ function collectSelections() {
 			qid,
 			pairId: cards[i].dataset.pid,
 			choice,
+			leftName,
+			rightName,
 			chosenName,
 			rejectedName,
 			chosenMode,
 			rejectedMode,
-			leftName,
-			rightName
 		});
 	}
 	return selections;
