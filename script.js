@@ -12,6 +12,10 @@ const pairsHost = document.getElementById("pairsHost");
 const statusEl = document.getElementById("status");
 const submitBtn = document.getElementById("submitBtn");
 
+// Ensure the submit button starts disabled until a manifest is loaded and
+// all questions are answered. This prevents submitting when there are no questions.
+if (submitBtn) submitBtn.disabled = true;
+
 let isSubmitting = false;
 let hasSubmitted = false; // once true, prevent further submissions
 
@@ -263,7 +267,7 @@ async function submit() {
 	}
 }
 
-document.getElementById("submitBtn").addEventListener("click", submit);
+if (submitBtn) submitBtn.addEventListener("click", submit);
 
 // boot
 // show consent modal and require token before loading manifest
