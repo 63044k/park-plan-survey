@@ -53,7 +53,7 @@ function manifestUrl() {
 }
 
 async function loadManifest() {
-	setStatus("Loading form…");
+	setStatus("Loading form… (this can take a few seconds)");
 	const res = await fetch(manifestUrl());
 	const j = await res.json();
 	if (!j.ok) throw new Error(j.error || "manifest error");
