@@ -36,7 +36,7 @@ async function loadManifest() {
 	return j;
 }
 
-function renderPairs(pairs) {
+function renderPairsX(pairs) {
 	pairsHost.innerHTML = "";
 	pairs.forEach((p, idx) => {
 		const qid = "q" + (idx + 1); // simple sequential ids for the client
@@ -80,6 +80,58 @@ function renderPairs(pairs) {
 		pairsHost.appendChild(card);
 	});
 }
+
+function renderPairs(pairs) {
+  const toDataUrl = (mime, b64) => `data:${mime};base64,${b64}`;
+
+  pairsHost.innerHTML = "";
+  pairs.forEach((p, idx) => {
+    const qid = "q" + (idx + 1);
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const head = document.createElement("div");
+    head.innerHTML = `<strong>Question ${idx + 1}</strong> <span class="muted">${p.id}</span>`;
+    card.appendChild(head);
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+
+    // Build sources:
+    const leftSrc  = p.leftB64  ? toDataUrl(p.leftMime,  p.leftB64)  : (p.left  || "");
+    const rightSrc = p.rightB64 ? toDataUrl(p.rightMime, p.rightB64) : (p.right || "");
+
+    const leftWrap = document.createElement("div");
+    leftWrap.innerHTML = `
+      <img src="${leftSrc}" alt="${qid}-A">
+      <label class="block"><input type="radio" name="${qid}" value="A"> Choose A</label>
+    `;
+
+    const rightWrap = document.createElement("div");
+    rightWrap.innerHTML = `
+      <img src="${rightSrc}" alt="${qid}-B">
+      <label class="block"><input type="radio" name="${qid}" value="B"> Choose B</label>
+    `;
+
+    grid.appendChild(leftWrap);
+    grid.appendChild(rightWrap);
+    card.appendChild(grid);
+
+    // Optional undecided
+    const undec = document.createElement("label");
+    undec.className = "block muted";
+    undec.innerHTML = `<input type="radio" name="${qid}" value="U"> Can't decide`;
+    card.appendChild(undec);
+
+    // Store sources for submit (note: these are data URLs now)
+    card.dataset.left = leftSrc;
+    card.dataset.right = rightSrc;
+    card.dataset.pid = p.id; // pair folder name
+
+    pairsHost.appendChild(card);
+  });
+}
+
 
 function collectSelections() {
 	const cards = Array.from(pairsHost.querySelectorAll(".card"));
