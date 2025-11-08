@@ -7,8 +7,7 @@ const params = new URLSearchParams(location.search);
 const forcedScenario = params.get("scenario");
 const forcedLLM = params.get("llm");
 
-const scenarioEl = document.getElementById("scenario");
-const llmEl = document.getElementById("llm");
+// Scenario/LLM UI removed; we'll log those values instead of writing to the DOM.
 const pairsHost = document.getElementById("pairsHost");
 const statusEl = document.getElementById("status");
 
@@ -223,8 +222,9 @@ async function requireConsentAndToken() {
 		// generate participantId as a GUID on page load
 		participantId = makeGuid();
 		manifest = await loadManifest();
-		scenarioEl.textContent = manifest.scenarioId;
-		llmEl.textContent = manifest.llmId;
+		// log scenario and llm to console (UI removed)
+		console.log('manifest.scenarioId=', manifest.scenarioId);
+		console.log('manifest.llmId=', manifest.llmId);
 		renderPairs(manifest.pairs || []);
 		setStatus("Loaded.", "muted");
 	} catch (e) {
