@@ -139,6 +139,47 @@ function updateSubmitState() {
 	submitBtn.disabled = !allAnswered();
 }
 
+// reload button management
+function createReloadButton() {
+	// don't create twice
+	if (document.getElementById('reloadBtn')) return;
+	const btn = document.createElement('button');
+	btn.id = 'reloadBtn';
+	btn.textContent = 'Load another set';
+	btn.style.marginLeft = '12px';
+	btn.addEventListener('click', async () => {
+		// remove the reload button immediately so it disappears as soon as it's pressed
+		removeReloadButton();
+		try {
+			// clear existing UI and state
+			pairsHost.innerHTML = '';
+			hasSubmitted = false;
+			isSubmitting = false;
+			updateSubmitState();
+			setStatus('Loading next set…', 'muted');
+			// fetch and render new manifest
+			manifest = await loadManifest();
+			console.log('manifest.scenarioId=', manifest.scenarioId);
+			console.log('manifest.llmId=', manifest.llmId);
+			renderPairs(manifest.pairs || []);
+			setStatus('Loaded.', 'muted');
+		} catch (e) {
+			console.error(e);
+			setStatus(e.message || 'Could not load next set.', 'err');
+		}
+	});
+
+	// place after status element
+	if (statusEl && statusEl.parentNode) {
+		statusEl.parentNode.appendChild(btn);
+	}
+}
+
+function removeReloadButton() {
+	const b = document.getElementById('reloadBtn');
+	if (b && b.parentNode) b.parentNode.removeChild(b);
+}
+
 
 function collectSelections() {
 	const cards = Array.from(pairsHost.querySelectorAll(".card"));
@@ -204,11 +245,13 @@ async function submit() {
 			// pretty-print the JSON so it's human readable (includes newlines)
 			body: JSON.stringify(body, null, 2)
 		});
-		const j = await res.json();
-		if (!j.ok) throw new Error(j.error || "submit failed");
-		setStatus("Saved. Thank you.", "ok");
-		hasSubmitted = true; // permanently mark as submitted
-		updateSubmitState();
+	const j = await res.json();
+	if (!j.ok) throw new Error(j.error || "submit failed");
+	setStatus("Saved. Thank you.", "ok");
+	hasSubmitted = true; // permanently mark as submitted
+	updateSubmitState();
+	// show a reload button so the user can load another set (clears old data)
+	createReloadButton();
 	} catch (e) {
 		console.error(e);
 		setStatus(e.message || "Error", "err");
