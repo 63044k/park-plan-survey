@@ -62,9 +62,12 @@ function renderPairs(pairs) {
     const card = document.createElement("div");
     card.className = "card";
 
-    const head = document.createElement("div");
-    head.innerHTML = `<strong>Question ${idx + 1}</strong> <span class="muted">${p.id}</span>`;
-    card.appendChild(head);
+	const head = document.createElement("div");
+	// Do not render the pair id in the UI; log it for debugging instead.
+	head.innerHTML = `<strong>Question ${idx + 1}</strong>`;
+	card.appendChild(head);
+	// Log pair id to console (developer-visible only)
+	console.log(`pair ${qid} id=`, p.id);
 
     const grid = document.createElement("div");
     grid.className = "grid";
