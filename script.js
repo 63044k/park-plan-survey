@@ -141,13 +141,21 @@ function allAnswered() {
 	return true;
 }
 
+// Ensure required demographics are selected
+function demographicsAnswered() {
+    const ageSel = document.querySelector('input[name="ageRange"]:checked');
+    const expSel = document.querySelector('input[name="experienceYears"]:checked');
+    return !!(ageSel && expSel);
+}
+
 function updateSubmitState() {
 	if (!submitBtn) return;
 	if (hasSubmitted || isSubmitting) {
 		submitBtn.disabled = true;
 		return;
 	}
-	submitBtn.disabled = !allAnswered();
+	// require both that all question pairs are answered and that demographics are provided
+	submitBtn.disabled = !(allAnswered() && demographicsAnswered());
 }
 
 // reload button management
@@ -231,6 +239,14 @@ async function submit() {
 		// disable the button immediately
 		if (submitBtn) submitBtn.disabled = true;
 
+		// final validation: ensure demographics present
+		if (!demographicsAnswered()) {
+			setStatus('Please complete the demographics section before submitting.', 'err');
+			isSubmitting = false;
+			updateSubmitState();
+			return;
+		}
+
 		const selections = collectSelections();
 		// participantId was generated on page load (no UI)
 		const participantIdLocal = participantId || makeGuid();
@@ -238,12 +254,21 @@ async function submit() {
 
 		const layoutHash = extractFirstBracketContent(manifest && manifest.scenarioId);
 
+		// collect optional demographics (may be null)
+		const ageSel = document.querySelector('input[name="ageRange"]:checked');
+		const expSel = document.querySelector('input[name="experienceYears"]:checked');
+		const demographics = {
+			ageRange: ageSel ? ageSel.value : null,
+			experienceYears: expSel ? expSel.value : null
+		};
+
 		const body = {
 			token: TOKEN,
 			participantId: participantIdLocal,
 			scenarioId: manifest.scenarioId,
 			layoutHash: layoutHash,
 			llmId: manifest.llmId,
+			demographics,
 			selections,
 			clientMeta: {
 				ts: ts,
@@ -278,6 +303,15 @@ async function submit() {
 }
 
 if (submitBtn) submitBtn.addEventListener("click", submit);
+
+// Attach listeners to demographics radios so submit state updates when they change
+function attachDemographicsListeners(){
+	const inputs = document.querySelectorAll('input[name="ageRange"], input[name="experienceYears"]');
+	inputs.forEach(i => i.addEventListener('change', () => updateSubmitState()));
+}
+
+// Attach now — demographics card is in the DOM statically
+attachDemographicsListeners();
 
 // boot
 // show consent modal and require token before loading manifest
