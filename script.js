@@ -311,7 +311,12 @@ if (submitBtn) submitBtn.addEventListener("click", submit);
 // Attach listeners to demographics radios so submit state updates when they change
 function attachDemographicsListeners(){
 	const inputs = document.querySelectorAll('input[name="ageRange"], input[name="experienceYears"]');
-	inputs.forEach(i => i.addEventListener('change', () => updateSubmitState()));
+	inputs.forEach(i => i.addEventListener('change', () => {
+		// regenerate participant GUID whenever demographics change
+		participantId = makeGuid();
+		console.log('participantId regenerated=', participantId);
+		updateSubmitState();
+	}));
 }
 
 // Attach now — demographics card is in the DOM statically
