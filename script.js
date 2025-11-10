@@ -350,7 +350,7 @@ function updateInstructionHighlight() {
 	const el = document.getElementById('instructionHighlight');
 	if (!el) return;
 	if (SHOW_ORIGINAL_IMAGE) {
-		el.textContent = 'please select the design alternative that transforms the original image to best balance two criteria:';
+		el.textContent = 'please select the design alternative that transforms the original park plan to best balance two criteria:';
 	} else {
 		el.textContent = 'please select the design alternative that best balances two criteria:';
 	}
