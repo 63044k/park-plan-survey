@@ -206,7 +206,7 @@ function createReloadButton() {
 			// fetch and render new manifest
 			manifest = await loadManifest();
 			console.log('manifest.scenarioId=', manifest.scenarioId);
-			console.log('manifest.llmId=', manifest.llmId);
+			console.log('manifest.[mod]=', manifest.llmId ? String(manifest.llmId).slice(0,2) : manifest.llmId);
 			renderPairs(manifest.pairs || []);
 			setStatus('Loaded.', 'muted');
 		} catch (e) {
@@ -405,8 +405,8 @@ async function requireConsentAndToken() {
 		participantId = makeGuid();
 		manifest = await loadManifest();
 		// log scenario and llm to console (UI removed)
-		console.log('manifest.scenarioId=', manifest.scenarioId);
-		console.log('manifest.llmId=', manifest.llmId);
+			console.log('manifest.scenarioId=', manifest.scenarioId);
+			console.log('manifest.[mod]=', manifest.llmId ? String(manifest.llmId).slice(0,2) : manifest.llmId);
 		renderPairs(manifest.pairs || []);
 		setStatus("Loaded.", "muted");
 	} catch (e) {
