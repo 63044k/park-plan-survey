@@ -7,6 +7,10 @@ const params = new URLSearchParams(location.search);
 const forcedScenario = params.get("scenario");
 const forcedLLM = params.get("llm");
 
+// Toggle: display the manifest-provided original image (original.originalB64) above each pair
+// Set to true to render the original image (data URI) between the question title and description.
+const SHOW_ORIGINAL_IMAGE = true;
+
 // Scenario/LLM UI removed; we'll log those values instead of writing to the DOM.
 const pairsHost = document.getElementById("pairsHost");
 const statusEl = document.getElementById("status");
@@ -70,6 +74,10 @@ async function loadManifest() {
 
 function renderPairs(pairs) {
   const toDataUrl = (mime, b64) => `data:${mime};base64,${b64}`;
+  // if enabled and manifest contains an original image, build its data URL once
+  const originalDataUrl = (SHOW_ORIGINAL_IMAGE && manifest && manifest.original && manifest.original.originalB64)
+    ? toDataUrl(manifest.original.originalMime, manifest.original.originalB64)
+    : null;
 
   pairsHost.innerHTML = "";
   pairs.forEach((p, idx) => {
@@ -81,8 +89,23 @@ function renderPairs(pairs) {
 	// Do not render the pair id in the UI; log it for debugging instead.
 	head.innerHTML = `<strong>Question ${idx + 1}</strong>`;
 	card.appendChild(head);
-    const desc = document.createElement("div");
-    desc.innerHTML = `<em>Please select the park design that best balances pleasant green space qualities and good passive surveillance.</em>`;
+
+	// If available, show the manifest's original image for context (optional)
+	if (originalDataUrl) {
+		const origWrap = document.createElement('div');
+		origWrap.style.textAlign = 'center';
+		origWrap.style.margin = '8px 0';
+		origWrap.innerHTML = `<img src="${originalDataUrl}" alt="${qid}-original" style="max-width:60%; border-radius:6px; border:1px solid #eee">`;
+		card.appendChild(origWrap);
+	}
+
+	const desc = document.createElement("div");
+    if (originalDataUrl) {
+        desc.innerHTML = `<em>Please select the park design that best transform to balance pleasant green space qualities and good passive surveillance.</em>`;
+    }
+    else {
+        desc.innerHTML = `<em>Please select the park design that best balances pleasant green space qualities and good passive surveillance.</em>`;
+    }
 	card.appendChild(desc);
 
 	// Log pair id to console (developer-visible only)
