@@ -82,7 +82,7 @@ function renderPairs(pairs) {
 	head.innerHTML = `<strong>Question ${idx + 1}</strong>`;
 	card.appendChild(head);
     const desc = document.createElement("div");
-    desc.innerHTML = `<em>Please select the park design that best balances aesthetic quality and passive surveillance.</em>`;
+    desc.innerHTML = `<em>Please select the park design that best balances pleasant green space qualities and good passive surveillance.</em>`;
 	card.appendChild(desc);
 
 	// Log pair id to console (developer-visible only)
