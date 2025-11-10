@@ -345,6 +345,19 @@ function attachDemographicsListeners(){
 // Attach now — demographics card is in the DOM statically
 attachDemographicsListeners();
 
+// Update the emphasized highlight text depending on SHOW_ORIGINAL_IMAGE
+function updateInstructionHighlight() {
+	const el = document.getElementById('instructionHighlight');
+	if (!el) return;
+	if (SHOW_ORIGINAL_IMAGE) {
+		el.textContent = 'please select the design alternative that transforms the original image to best balance two criteria:';
+	} else {
+		el.textContent = 'please select the design alternative that best balances two criteria:';
+	}
+}
+
+updateInstructionHighlight();
+
 // boot
 // show consent modal and require token before loading manifest
 async function requireConsentAndToken() {
