@@ -101,10 +101,12 @@ function renderPairs(pairs) {
 
 	const desc = document.createElement("div");
     if (originalDataUrl) {
-        desc.innerHTML = `<em>Please select the park design that best transforms the above to balance pleasant green space qualities and good passive surveillance.</em>`;
+        // desc.innerHTML = `<em>Please select the park design that best transforms the above to balance pleasant green space qualities and good passive surveillance.</em>`;
+        desc.innerHTML = `<em>Please select the design below that best balances passive surveillance with green-space qualities for the park shown above.</em>`;
     }
     else {
-        desc.innerHTML = `<em>Please select the park design that best balances pleasant green space qualities and good passive surveillance.</em>`;
+        // desc.innerHTML = `<em>Please select the park design that best balances pleasant green space qualities and good passive surveillance.</em>`;
+        desc.innerHTML = `<em>Please select the design below that best balances passive surveillance with green-space qualities.</em>`;
     }
 	card.appendChild(desc);
 
